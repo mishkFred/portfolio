@@ -1,0 +1,386 @@
+/**
+ * Girly To-Do List Styles
+ * Theme: Pink and Purple Girly Design with Falling Flowers
+ * Author: Your Name
+ * Version: 1.0
+ */
+
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #ffd6e7, #f2c2ff);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Falling flowers container */
+#flower-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.flower {
+    position: absolute;
+    top: -100px;
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.7);
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+    animation: fall linear infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(calc(100vh + 100px)) rotate(360deg);
+    }
+}
+
+/* Main container */
+.container {
+    width: 100%;
+    max-width: 500px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    position: relative;
+    z-index: 2;
+}
+
+/* Header section */
+.header {
+    background: linear-gradient(135deg, #ff85a2, #c86bfa);
+    color: white;
+    padding: 25px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23ffffff' fill-opacity='0.2' d='M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,213.3C672,192,768,128,864,128C960,128,1056,192,1152,192C1248,192,1344,128,1392,96L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+    background-size: cover;
+}
+
+.header h1 {
+    font-size: 2.2rem;
+    margin-bottom: 5px;
+    position: relative;
+    z-index: 1;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.header p {
+    font-size: 1rem;
+    opacity: 0.9;
+    position: relative;
+    z-index: 1;
+}
+
+/* Input section */
+.input-section {
+    padding: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.input-section input {
+    flex: 1;
+    padding: 12px 15px;
+    border: 2px solid #ffc2d6;
+    border-radius: 50px;
+    outline: none;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.input-section input:focus {
+    border-color: #ff85a2;
+    box-shadow: 0 0 0 3px rgba(255, 133, 162, 0.3);
+}
+
+.input-section button {
+    background: #ff85a2;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+}
+
+.input-section button:hover {
+    background: #ff6b9d;
+    transform: scale(1.05);
+}
+
+/* Filter buttons */
+.filters {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 20px 15px;
+}
+
+.filters button {
+    padding: 8px 15px;
+    border: 1px solid #ffc2d6;
+    background: white;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+}
+
+.filters button.active {
+    background: #ff85a2;
+    color: white;
+    border-color: #ff85a2;
+}
+
+.filters button:hover:not(.active) {
+    background: #fff0f5;
+}
+
+/* Todo list */
+.todo-list {
+    padding: 0 20px 20px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.todo-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 10px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s;
+    animation: fadeIn 0.5s;
+    border-left: 4px solid #ff85a2;
+}
+
+.todo-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.todo-item.completed {
+    opacity: 0.7;
+    border-left-color: #c86bfa;
+}
+
+.todo-item.completed .todo-text {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.todo-checkbox {
+    margin-right: 15px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #ffc2d6;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s;
+}
+
+.todo-checkbox.checked {
+    background: #c86bfa;
+    border-color: #c86bfa;
+}
+
+.todo-checkbox.checked::after {
+    content: "✓";
+    color: white;
+    font-size: 12px;
+}
+
+.todo-text {
+    flex: 1;
+    font-size: 1rem;
+}
+
+.todo-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.todo-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.edit-btn {
+    color: #ffb6c1;
+}
+
+.edit-btn:hover {
+    background: #fff0f5;
+    color: #ff85a2;
+}
+
+.delete-btn {
+    color: #ffb6c1;
+}
+
+.delete-btn:hover {
+    background: #fff0f5;
+    color: #ff6b6b;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #888;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: #ffc2d6;
+}
+
+.stats {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 20px;
+    background: #fff0f5;
+    border-top: 1px solid #ffd6e7;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Scrollbar styling */
+.todo-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.todo-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.todo-list::-webkit-scrollbar-thumb {
+    background: #ffc2d6;
+    border-radius: 10px;
+}
+
+.todo-list::-webkit-scrollbar-thumb:hover {
+    background: #ff85a2;
+}
+
+/* Floral decorations */
+.floral-decoration {
+    position: absolute;
+    opacity: 0.1;
+    z-index: 0;
+}
+
+.floral-1 {
+    top: 10px;
+    right: 10px;
+    font-size: 80px;
+    color: #ff85a2;
+    transform: rotate(15deg);
+}
+
+.floral-2 {
+    bottom: 10px;
+    left: 10px;
+    font-size: 60px;
+    color: #c86bfa;
+    transform: rotate(-10deg);
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+    
+    .header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .input-section {
+        padding: 15px;
+    }
+    
+    .todo-list {
+        max-height: 300px;
+    }
+    
+    .stats {
+        flex-direction: column;
+        gap: 5px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 400px) {
+    .filters {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .filters button {
+        width: 100%;
+        max-width: 200px;
+    }
+    
+    .header {
+        padding: 20px 15px;
+    }
+    
+    .header h1 {
+        font-size: 1.5rem;
+    }
+}

@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blush Boutique - Элегантные товары</title>
+    <style>
+        /* Базовые стили */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-pink: #f8d7da;
+            --light-pink: #f9ecec;
+            --pastel-pink: #fadadd;
+            --pastel-lavender: #e6e6fa;
+            --pastel-mint: #d1ecf1;
+            --pastel-peach: #ffdab9;
+            --text-dark: #5a5a5a;
+            --text-light: #888;
+            --white: #ffffff;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --border-radius: 12px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-pink);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Шапка */
+        .header {
+            background: linear-gradient(135deg, var(--pastel-pink), var(--pastel-lavender));
+            padding: 1rem 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 300;
+            color: var(--text-dark);
+            letter-spacing: 1px;
+        }
+
+        .cart-toggle {
+            background: var(--white);
+            border: 2px solid var(--pastel-pink);
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+        }
+
+        .cart-toggle:hover {
+            background: var(--pastel-pink);
+            transform: translateY(-2px);
+        }
+
+        /* Основной контент */
+        .main {
+            padding: 2rem 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: 300;
+            color: var(--text-dark);
+            font-size: 2rem;
+        }
+
+        /* Сетка товаров */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .product-card {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            border: 1px solid var(--pastel-pink);
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, var(--pastel-lavender), var(--pastel-mint));
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .product-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .product-description {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .product-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .product-price {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .add-to-cart {
+            background: linear-gradient(135deg, var(--pastel-pink), var(--pastel-peach));
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 20px;
+            cursor: pointer;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .add-to-cart:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .add-to-cart:active {
+            transform: scale(0.95);
+        }
+
+        /* Модальное окно корзины */
+        .cart-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .cart-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cart-content {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .cart-header {
+            background: linear-gradient(135deg, var(--pastel-pink), var(--pastel-lavender));
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-header h2 {
+            margin: 0;
+            font-weight: 300;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-dark);
+            transition: transform 0.3s ease;
+        }
+
+        .close-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .cart-body {
+            padding: 1.5rem;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--pastel-pink);
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-info h4 {
+            margin-bottom: 0.3rem;
+            font-weight: 500;
+        }
+
+        .item-info .item-price {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .item-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quantity-btn {
+            background: var(--pastel-pink);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .quantity-btn:hover {
+            background: var(--pastel-peach);
+        }
+
+        .remove-btn {
+            background: var(--pastel-pink);
+            border: none;
+            padding: 0.3rem 0.6rem;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            background: #f8c6cb;
+        }
+
+        /* Секция промокода */
+        .promo-section {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: var(--light-pink);
+            border-radius: var(--border-radius);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .promo-input {
+            flex: 1;
+            padding: 0.7rem;
+            border: 1px solid var(--pastel-pink);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .promo-btn {
+            background: linear-gradient(135deg, var(--pastel-lavender), var(--pastel-mint));
+            border: none;
+            padding: 0.7rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+        }
+
+        .promo-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Итоговая сумма */
+        .cart-summary {
+            background: var(--light-pink);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            margin: 1.5rem 0;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+        }
+
+        .summary-row.total {
+            border-top: 1px solid var(--pastel-pink);
+            padding-top: 0.8rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .discount-hidden {
+            display: none;
+        }
+
+        .discount-hidden.visible {
+            display: flex;
+            color: #28a745;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--pastel-pink), var(--pastel-peach));
+            border: none;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            cursor: pointer;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+        }
+
+        .checkout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .checkout-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 1.5rem;
+            }
+            
+            .cart-content {
+                width: 95%;
+                margin: 1rem;
+            }
+            
+            .promo-section {
+                flex-direction: column;
+            }
+        }
+
+        .empty-cart {
+            text-align: center;
+            color: var(--text-light);
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">Blush Boutique</h1>
+            <nav class="nav">
+                <button class="cart-toggle" id="cartToggle">
+                    Корзина (<span id="cartCount">0</span>)
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <section class="products-section">
+                <h2 class="section-title">Наши товары</h2>
+                <div class="products-grid" id="productsGrid">
+                    <!-- Товары будут загружены через JavaScript -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Модальное окно корзины -->
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-content">
+            <div class="cart-header">
+                <h2>Ваша корзина</h2>
+                <button class="close-btn" id="closeCart">&times;</button>
+            </div>
+            
+            <div class="cart-body">
+                <div class="cart-items" id="cartItems">
+                    <div class="empty-cart">Корзина пуста</div>
+                </div>
+                
+                <div class="promo-section">
+                    <input type="text" id="promoCode" placeholder="Введите промокод" class="promo-input">
+                    <button id="applyPromo" class="promo-btn">Применить</button>
+                </div>
+                
+                <div class="cart-summary">
+                    <div class="summary-row">
+                        <span>Товары:</span>
+                        <span id="subtotal">0 ₽</span>
+                    </div>
+                    <div class="summary-row discount-hidden" id="discountRow">
+                        <span>Скидка:</span>
+                        <span id="discountAmount">0 ₽</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Итого:</span>
+                        <span id="totalAmount">0 ₽</span>
+                    </div>
+                </div>
+                
+                <button class="checkout-btn" id="checkoutBtn" disabled>Оформить заказ</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Данные товаров
+        const products = [
+            {
+                id: 1,
+                name: "Нежный блеск для губ",
+                description: "Увлажняющий блеск с мерцающим эффектом",
+                price: 890,
+                image: "lip-gloss"
+            },
+            {
+                id: 2,
+                name: "Пудра с эффектом сияния",
+                description: "Легкая рассыпчатая пудра для идеального тона",
+                price: 1250,
+                image: "powder"
+            },
+            {
+                id: 3,
+                name: "Тени для век пастельные",
+                description: "Набор из 6 нежных оттенков с перламутром",
+                price: 1560,
+                image: "eyeshadow"
+            },
+            {
+                id: 4,
+                name: "Румяна персиковый шепот",
+                description: "Кремовые румяна для естественного румянца",
+                price: 950,
+                image: "blush"
+            },
+            {
+                id: 5,
+                name: "Тушь для ресниц объем",
+                description: "Создает эффект накладных ресниц",
+                price: 1100,
+                image: "mascara"
+            },
+            {
+                id: 6,
+                name: "Хайлайтер лунное сияние",
+                description: "Жидкий хайлайтер для сияния кожи",
+                price: 1320,
+                image: "highlighter"
+            }
+        ];
+
+        // Глобальные переменные
+        let cartItems = [];
+        let currentDiscount = 0;
+        let activePromoCode = null;
+
+        // Промокоды
+        const promoCodes = {
+            'WELCOME10': 10,
+            'SUMMER20': 20,
+            'BEAUTY15': 15,
+            'FIRSTORDER': 25
+        };
+
+        // Элементы DOM
+        const productsGrid = document.getElementById('productsGrid');
+        const cartModal = document.getElementById('cartModal');
+        const cartToggle = document.getElementById('cartToggle');
+        const closeCart = document.getElementById('closeCart');
+        const cartCountElement = document.getElementById('cartCount');
+        const cartItemsElement = document.getElementById('cartItems');
+        const subtotalElement = document.getElementById('subtotal');
+        const discountAmountElement = document.getElementById('discountAmount');
+        const totalAmountElement = document.getElementById('totalAmount');
+        const discountRow = document.getElementById('discountRow');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        const promoInput = document.getElementById('promoCode');
+        const applyPromoBtn = document.getElementById('applyPromo');
+
+        // Функция отрисовки товаров
+        function renderProducts() {
+            productsGrid.innerHTML = products.map(product => `
+                <div class="product-card" data-id="${product.id}">
+                    <div class="product-image">
+                        ${product.name}
+                    </div>
+                    <h3 class="product-title">${product.name}</h3>
+                    <p class="product-description">${product.description}</p>
+                    <div class="product-footer">
+                        <span class="product-price">${product.price} ₽</span>
+                        <button class="add-to-cart" data-id="${product.id}">
+                            В корзину
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Добавляем обработчики событий для кнопок
+            productsGrid.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const productId = parseInt(e.target.dataset.id);
+                    const product = products.find(p => p.id === productId);
+                    if (product) {
+                        addToCart(product);
+                    }
+                });
+            });
+        }
+
+        // Функции корзины
+        function addToCart(product) {
+            const existingItem = cartItems.find(item => item.id === product.id);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cartItems.push({
+                    ...product,
+                    quantity: 1
+                });
+            }
+            
+            updateCartDisplay();
+            showAddToCartAnimation(product.id);
+        }
+
+        function removeFromCart(productId) {
+            cartItems = cartItems.filter(item => item.id !== productId);
+            updateCartDisplay();
+        }
+
+        function updateQuantity(productId, change) {
+            const item = cartItems.find(item => item.id === productId);
+            if (item) {
+                item.quantity += change;
+                if (item.quantity <= 0) {
+                    removeFromCart(productId);
+                    return;
+                }
+            }
+            updateCartDisplay();
+        }
+
+        function calculateTotals() {
+            const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const discount = currentDiscount;
+            const total = Math.max(0, subtotal - discount);
+            
+            return { subtotal, discount, total };
+        }
+
+        function updateCartDisplay() {
+            const { subtotal, discount, total } = calculateTotals();
+            
+            // Обновляем счетчик товаров
+            const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+            cartCountElement.textContent = totalItems;
+            
+            // Отрисовываем товары в корзине
+            renderCartItems();
+            
+            // Обновляем суммы
+            subtotalElement.textContent = `${subtotal} ₽`;
+            discountAmountElement.textContent = `-${discount} ₽`;
+            totalAmountElement.textContent = `${total} ₽`;
+            
+            // Показываем/скрываем строку скидки
+            if (discount > 0) {
+                discountRow.classList.add('visible');
+            } else {
+                discountRow.classList.remove('visible');
+            }
+            
+            // Обновляем кнопку оформления заказа
+            checkoutBtn.disabled = cartItems.length === 0;
+        }
+
+        function renderCartItems() {
+            if (cartItems.length === 0) {
+                cartItemsElement.innerHTML = '<div class="empty-cart">Корзина пуста</div>';
+                return;
+            }
+            
+            cartItemsElement.innerHTML = cartItems.map(item => `
+                <div class="cart-item">
+                    <div class="item-info">
+                        <h4>${item.name}</h4>
+                        <span class="item-price">${item.price} ₽ × ${item.quantity}</span>
+                    </div>
+                    <div class="item-controls">
+                        <button class="quantity-btn minus" data-id="${item.id}">-</button>
+                        <span>${item.quantity}</span>
+                        <button class="quantity-btn plus" data-id="${item.id}">+</button>
+                        <button class="remove-btn" data-id="${item.id}">Удалить</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Добавляем обработчики событий
+            cartItemsElement.querySelectorAll('.quantity-btn.plus').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const productId = parseInt(e.target.dataset.id);
+                    updateQuantity(productId, 1);
+                });
+            });
+            
+            cartItemsElement.querySelectorAll('.quantity-btn.minus').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const productId = parseInt(e.target.dataset.id);
+                    updateQuantity(productId, -1);
+                });
+            });
+            
+            cartItemsElement.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const productId = parseInt(e.target.dataset.id);
+                    removeFromCart(productId);
+                });
+            });
+        }
+
+        function showAddToCartAnimation(productId) {
+            const productCard = document.querySelector(`.product-card[data-id="${productId}"]`);
+            const addButton = productCard.querySelector('.add-to-cart');
+            
+            const originalText = addButton.textContent;
+            addButton.textContent = 'Добавлено!';
+            addButton.style.background = 'linear-gradient(135deg, #d1ecf1, #e6e6fa)';
+            
+            setTimeout(() => {
+                addButton.textContent = originalText;
+                addButton.style.background = 'linear-gradient(135deg, #fadadd, #ffdab9)';
+            }, 1000);
+        }
+
+        // Функции промокодов
+        function applyPromoCode(code) {
+            const upperCode = code.toUpperCase();
+            
+            if (activePromoCode === upperCode) {
+                showPromoMessage('Этот промокод уже применен', false);
+                return;
+            }
+            
+            if (promoCodes[upperCode]) {
+                if (cartItems.length === 0) {
+                    showPromoMessage('Добавьте товары в корзину для применения промокода', false);
+                    return;
+                }
+                
+                activePromoCode = upperCode;
+                applyDiscount(promoCodes[upperCode]);
+                showPromoMessage(`Промокод применен! Скидка ${promoCodes[upperCode]}%`, true);
+                promoInput.value = '';
+            } else {
+                showPromoMessage('Неверный промокод', false);
+            }
+        }
+
+        function applyDiscount(discountPercent) {
+            const { subtotal } = calculateTotals();
+            currentDiscount = Math.round(subtotal * (discountPercent / 100));
+            updateCartDisplay();
+        }
+
+        function showPromoMessage(message, isSuccess) {
+            // Удаляем существующее сообщение
+            const existingMessage = document.querySelector('.promo-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+            
+            // Создаем новое сообщение
+            const messageElement = document.createElement('div');
+            messageElement.className = `promo-message`;
+            messageElement.textContent = message;
+            messageElement.style.cssText = `
+                margin-top: 0.5rem;
+                padding: 0.5rem;
+                border-radius: 5px;
+                font-size: 0.9rem;
+                text-align: center;
+                background: ${isSuccess ? '#d4edda' : '#f8d7da'};
+                color: ${isSuccess ? '#155724' : '#721c24'};
+                border: 1px solid ${isSuccess ? '#c3e6cb' : '#f5c6cb'};
+            `;
+            
+            document.querySelector('.promo-section').appendChild(messageElement);
+            
+            // Автоматически удаляем сообщение через 3 секунды
+            setTimeout(() => {
+                if (messageElement.parentNode) {
+                    messageElement.remove();
+                }
+            }, 3000);
+        }
+
+        // Инициализация приложения
+        document.addEventListener('DOMContentLoaded', function() {
+            // Отрисовка товаров
+            renderProducts();
+
+            // Управление модальным окном корзины
+            cartToggle.addEventListener('click', () => {
+                cartModal.classList.add('active');
+            });
+
+            closeCart.addEventListener('click', () => {
+                cartModal.classList.remove('active');
+            });
+
+            // Закрытие модального окна при клике вне его
+            cartModal.addEventListener('click', (e) => {
+                if (e.target === cartModal) {
+                    cartModal.classList.remove('active');
+                }
+            });
+
+            // Обработка промокодов
+            applyPromoBtn.addEventListener('click', () => {
+                const code = promoInput.value.trim();
+                if (!code) {
+                    showPromoMessage('Введите промокод', false);
+                    return;
+                }
+                applyPromoCode(code);
+            });
+
+            // Применение промокода по Enter
+            promoInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    applyPromoCode(promoInput.value.trim());
+                }
+            });
+
+            // Обработка оформления заказа
+            checkoutBtn.addEventListener('click', () => {
+                if (cartItems.length === 0) {
+                    alert('Добавьте товары в корзину перед оформлением заказа');
+                    return;
+                }
+                
+                const total = calculateTotals().total;
+                alert(`Заказ успешно оформлен! Сумма: ${total} ₽\nСпасибо за покупку!`);
+                // Очищаем корзину после заказа
+                cartItems = [];
+                currentDiscount = 0;
+                activePromoCode = null;
+                updateCartDisplay();
+                cartModal.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>

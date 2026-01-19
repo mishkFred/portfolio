@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Азиатский Платформер</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bcf7f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(255, 107, 107, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0a0c0;
+            margin-bottom: 20px;
+        }
+        
+        #gameContainer {
+            position: relative;
+            width: 800px;
+            height: 500px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+        }
+        
+        #gameCanvas {
+            background-color: #0d1b2a;
+            display: block;
+        }
+        
+        #uiOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            padding: 20px;
+        }
+        
+        .ui-element {
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 8px;
+            padding: 8px 15px;
+            margin-bottom: 10px;
+            display: inline-block;
+            pointer-events: auto;
+        }
+        
+        #levelDisplay {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #ffd93d;
+        }
+        
+        #scoreDisplay {
+            font-size: 1.2rem;
+            color: #6bcf7f;
+        }
+        
+        #livesDisplay {
+            font-size: 1.2rem;
+            color: #ff6b6b;
+        }
+        
+        #instructions {
+            background-color: rgba(0, 0, 0, 0.85);
+            border-radius: 10px;
+            padding: 20px;
+            max-width: 800px;
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #6bcf7f, #4a9c5e);
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, #7be090, #5bb46f);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        #restartBtn {
+            background: linear-gradient(135deg, #ff6b6b, #d95454);
+        }
+        
+        #restartBtn:hover {
+            background: linear-gradient(135deg, #ff8282, #e06767);
+        }
+        
+        #gameMessage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.9);
+            padding: 30px 50px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ffd93d;
+            display: none;
+            z-index: 10;
+            border: 3px solid #ffd93d;
+            box-shadow: 0 0 30px rgba(255, 217, 61, 0.5);
+        }
+        
+        .key {
+            display: inline-block;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 5px;
+            padding: 3px 8px;
+            margin: 0 5px;
+            font-family: monospace;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .level-theme {
+            color: #ffb347;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 850px) {
+            #gameContainer {
+                width: 95vw;
+                height: 400px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            #gameContainer {
+                height: 350px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Азиатский Платформер</h1>
+        <div class="subtitle">Пройди три уровня в современных азиатских городах</div>
+    </header>
+    
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
+        
+        <div id="uiOverlay">
+            <div class="ui-element" id="levelDisplay">Уровень 1: Токио</div>
+            <div class="ui-element" id="scoreDisplay">Очки: 0</div>
+            <div class="ui-element" id="livesDisplay">Жизни: 3</div>
+        </div>
+        
+        <div id="gameMessage"></div>
+    </div>
+    
+    <div class="controls">
+        <button id="startBtn">Начать игру</button>
+        <button id="restartBtn">Перезапуск</button>
+        <button id="level1Btn">Уровень 1: Токио</button>
+        <button id="level2Btn">Уровень 2: Сеул</button>
+        <button id="level3Btn">Уровень 3: Шанхай</button>
+    </div>
+    
+    <div id="instructions">
+        <h3>Управление и цель игры</h3>
+        <p><span class="level-theme">Уровень 1: Токио</span> - Собирайте суши и избегайте роботов-врагов.</p>
+        <p><span class="level-theme">Уровень 2: Сеул</span> - Собирайте корейские маски и избегайте летающих дронов.</p>
+        <p><span class="level-theme">Уровень 3: Шанхай</span> - Собирайте китайские фонарики и избегайте огненных драконов.</p>
+        <p>Цель: Собрать все предметы на уровне, чтобы перейти к следующему.</p>
+        <p>Управление: <span class="key">←</span> <span class="key">→</span> - движение, <span class="key">ПРОБЕЛ</span> или <span class="key">↑</span> - прыжок</p>
+    </div>
+
+    <script>
+        // Получаем элементы DOM
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const gameMessage = document.getElementById('gameMessage');
+        const levelDisplay = document.getElementById('levelDisplay');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const livesDisplay = document.getElementById('livesDisplay');
+        const startBtn = document.getElementById('startBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const level1Btn = document.getElementById('level1Btn');
+        const level2Btn = document.getElementById('level2Btn');
+        const level3Btn = document.getElementById('level3Btn');
+        
+        // Игровые переменные
+        let gameRunning = false;
+        let currentLevel = 1;
+        let score = 0;
+        let lives = 3;
+        let gameOver = false;
+        let gameWon = false;
+        
+        // Класс игрока
+        class Player {
+            constructor() {
+                this.width = 40;
+                this.height = 60;
+                this.x = 100;
+                this.y = canvas.height - 150;
+                this.velocityY = 0;
+                this.velocityX = 0;
+                this.speed = 5;
+                this.jumpPower = 15;
+                this.grounded = false;
+                this.color = '#ff6b6b';
+                this.facingRight = true;
+            }
+            
+            update(platforms) {
+                // Гравитация
+                if (!this.grounded) {
+                    this.velocityY += 0.8;
+                }
+                
+                // Движение
+                this.x += this.velocityX;
+                this.y += this.velocityY;
+                
+                // Ограничение по границам экрана
+                if (this.x < 0) this.x = 0;
+                if (this.x + this.width > canvas.width) this.x = canvas.width - this.width;
+                if (this.y > canvas.height) {
+                    this.y = canvas.height - 100;
+                    this.takeDamage();
+                }
+                
+                // Проверка столкновений с платформами
+                this.grounded = false;
+                for (let platform of platforms) {
+                    if (this.velocityY >= 0 && 
+                        this.x + this.width > platform.x && 
+                        this.x < platform.x + platform.width &&
+                        this.y + this.height > platform.y && 
+                        this.y + this.height < platform.y + platform.height + 10) {
+                        
+                        this.grounded = true;
+                        this.y = platform.y - this.height;
+                        this.velocityY = 0;
+                    }
+                }
+                
+                // Замедление по горизонтали
+                this.velocityX *= 0.8;
+            }
+            
+            jump() {
+                if (this.grounded) {
+                    this.velocityY = -this.jumpPower;
+                    this.grounded = false;
+                }
+            }
+            
+            moveLeft() {
+                this.velocityX = -this.speed;
+                this.facingRight = false;
+            }
+            
+            moveRight() {
+                this.velocityX = this.speed;
+                this.facingRight = true;
+            }
+            
+            draw() {
+                // Тело игрока
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+                
+                // Голова
+                ctx.fillStyle = '#ffd93d';
+                ctx.beginPath();
+                ctx.arc(this.x + this.width/2, this.y + 15, 15, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Глаза
+                ctx.fillStyle = '#1a1a2e';
+                ctx.beginPath();
+                if (this.facingRight) {
+                    ctx.arc(this.x + this.width/2 + 5, this.y + 12, 4, 0, Math.PI * 2);
+                } else {
+                    ctx.arc(this.x + this.width/2 - 5, this.y + 12, 4, 0, Math.PI * 2);
+                }
+                ctx.fill();
+                
+                // Украшение (харамаки)
+                ctx.fillStyle = '#6bcf7f';
+                ctx.fillRect(this.x, this.y + this.height - 10, this.width, 10);
+            }
+            
+            takeDamage() {
+                lives--;
+                updateUI();
+                if (lives <= 0) {
+                    gameOver = true;
+                    showMessage("ИГРА ОКОНЧЕНА");
+                } else {
+                    // Возрождение игрока
+                    this.x = 100;
+                    this.y = canvas.height - 150;
+                    this.velocityX = 0;
+                    this.velocityY = 0;
+                }
+            }
+        }
+        
+        // Класс платформы
+        class Platform {
+            constructor(x, y, width, height, color) {
+                this.x = x;
+                this.y = y;
+                this.width = width;
+                this.height = height;
+                this.color = color;
+            }
+            
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+                
+                // Текстура платформы
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+                for (let i = 0; i < this.width; i += 20) {
+                    ctx.fillRect(this.x + i, this.y, 10, this.height);
+                }
+            }
+        }
+        
+        // Класс предмета для сбора
+        class Collectible {
+            constructor(x, y, type) {
+                this.x = x;
+                this.y = y;
+                this.width = 30;
+                this.height = 30;
+                this.type = type; // 1: суши, 2: корейская маска, 3: китайский фонарик
+                this.collected = false;
+                this.animation = 0;
+            }
+            
+            update() {
+                this.animation += 0.1;
+            }
+            
+            draw() {
+                if (this.collected) return;
+                
+                ctx.save();
+                ctx.translate(this.x + this.width/2, this.y + this.height/2);
+                ctx.rotate(Math.sin(this.animation) * 0.1);
+                
+                switch(this.type) {
+                    case 1: // Суши
+                        ctx.fillStyle = '#ff8e8e';
+                        ctx.fillRect(-15, -10, 30, 20);
+                        ctx.fillStyle = '#6bcf7f';
+                        ctx.fillRect(-15, -5, 30, 10);
+                        ctx.fillStyle = '#ffd93d';
+                        ctx.fillRect(-10, -8, 5, 5);
+                        break;
+                    case 2: // Корейская маска
+                        ctx.fillStyle = '#a29bfe';
+                        ctx.beginPath();
+                        ctx.ellipse(0, 0, 15, 18, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#ffffff';
+                        ctx.beginPath();
+                        ctx.ellipse(0, 5, 10, 8, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#000000';
+                        ctx.fillRect(-5, -5, 3, 3);
+                        ctx.fillRect(2, -5, 3, 3);
+                        break;
+                    case 3: // Китайский фонарик
+                        ctx.fillStyle = '#ff6b6b';
+                        ctx.beginPath();
+                        ctx.moveTo(-15, -15);
+                        ctx.lineTo(15, -15);
+                        ctx.lineTo(10, 15);
+                        ctx.lineTo(-10, 15);
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.fillStyle = '#ffd93d';
+                        ctx.fillRect(-5, 15, 10, 10);
+                        break;
+                }
+                
+                ctx.restore();
+            }
+            
+            checkCollision(player) {
+                if (this.collected) return false;
+                
+                return player.x < this.x + this.width &&
+                       player.x + player.width > this.x &&
+                       player.y < this.y + this.height &&
+                       player.y + player.height > this.y;
+            }
+        }
+        
+        // Класс врага
+        class Enemy {
+            constructor(x, y, type) {
+                this.x = x;
+                this.y = y;
+                this.width = 40;
+                this.height = 40;
+                this.type = type; // 1: робот, 2: дрон, 3: дракон
+                this.velocityX = 2;
+                this.animation = 0;
+            }
+            
+            update() {
+                this.x += this.velocityX;
+                this.animation += 0.1;
+                
+                // Изменение направления при достижении границ
+                if (this.x <= 0 || this.x + this.width >= canvas.width) {
+                    this.velocityX *= -1;
+                }
+            }
+            
+            draw() {
+                ctx.save();
+                ctx.translate(this.x + this.width/2, this.y + this.height/2);
+                
+                switch(this.type) {
+                    case 1: // Робот (Токио)
+                        ctx.fillStyle = '#4a4a6d';
+                        ctx.fillRect(-20, -15, 40, 30);
+                        ctx.fillStyle = '#ff6b6b';
+                        ctx.fillRect(-15, -10, 10, 10);
+                        ctx.fillRect(5, -10, 10, 10);
+                        ctx.fillStyle = '#6bcf7f';
+                        ctx.fillRect(-5, 5, 10, 5);
+                        break;
+                    case 2: // Дрон (Сеул)
+                        ctx.fillStyle = '#a0a0c0';
+                        ctx.beginPath();
+                        ctx.ellipse(0, 0, 20, 10, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#ffd93d';
+                        ctx.fillRect(-15, -3, 30, 6);
+                        // Вращающиеся пропеллеры
+                        ctx.save();
+                        ctx.rotate(this.animation * 2);
+                        ctx.fillStyle = '#4a4a6d';
+                        ctx.fillRect(-25, -2, 50, 4);
+                        ctx.restore();
+                        break;
+                    case 3: // Дракон (Шанхай)
+                        ctx.fillStyle = '#ff8e8e';
+                        ctx.beginPath();
+                        ctx.ellipse(0, 0, 20, 15, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        // Рога
+                        ctx.fillStyle = '#ffd93d';
+                        ctx.beginPath();
+                        ctx.moveTo(-15, -15);
+                        ctx.lineTo(-25, -25);
+                        ctx.lineTo(-10, -15);
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.moveTo(15, -15);
+                        ctx.lineTo(25, -25);
+                        ctx.lineTo(10, -15);
+                        ctx.closePath();
+                        ctx.fill();
+                        // Пламя
+                        ctx.fillStyle = '#ffd93d';
+                        ctx.beginPath();
+                        ctx.moveTo(20, 0);
+                        ctx.lineTo(40, -5);
+                        ctx.lineTo(40, 5);
+                        ctx.closePath();
+                        ctx.fill();
+                        break;
+                }
+                
+                ctx.restore();
+            }
+            
+            checkCollision(player) {
+                return player.x < this.x + this.width &&
+                       player.x + player.width > this.x &&
+                       player.y < this.y + this.height &&
+                       player.y + player.height > this.y;
+            }
+        }
+        
+        // Игровые объекты
+        let player;
+        let platforms = [];
+        let collectibles = [];
+        let enemies = [];
+        
+        // Инициализация уровня
+        function initLevel(level) {
+            currentLevel = level;
+            player = new Player();
+            platforms = [];
+            collectibles = [];
+            enemies = [];
+            
+            // Сброс позиции игрока
+            player.x = 100;
+            player.y = canvas.height - 150;
+            
+            // Платформы для всех уровней
+            platforms.push(new Platform(0, canvas.height - 50, canvas.width, 50, '#4a4a6d'));
+            
+            // Конфигурация для каждого уровня
+            switch(level) {
+                case 1: // Токио
+                    levelDisplay.textContent = "Уровень 1: Токио";
+                    
+                    platforms.push(new Platform(200, 350, 150, 20, '#6bcf7f'));
+                    platforms.push(new Platform(400, 280, 150, 20, '#6bcf7f'));
+                    platforms.push(new Platform(600, 200, 150, 20, '#6bcf7f'));
+                    platforms.push(new Platform(300, 150, 100, 20, '#ff6b6b'));
+                    
+                    collectibles.push(new Collectible(250, 310, 1));
+                    collectibles.push(new Collectible(450, 240, 1));
+                    collectibles.push(new Collectible(650, 160, 1));
+                    collectibles.push(new Collectible(330, 110, 1));
+                    
+                    enemies.push(new Enemy(350, 310, 1));
+                    enemies.push(new Enemy(550, 160, 1));
+                    break;
+                    
+                case 2: // Сеул
+                    levelDisplay.textContent = "Уровень 2: Сеул";
+                    
+                    platforms.push(new Platform(150, 380, 120, 20, '#a29bfe'));
+                    platforms.push(new Platform(350, 320, 120, 20, '#a29bfe'));
+                    platforms.push(new Platform(550, 260, 120, 20, '#a29bfe'));
+                    platforms.push(new Platform(200, 200, 100, 20, '#ffd93d'));
+                    platforms.push(new Platform(500, 150, 100, 20, '#ffd93d'));
+                    
+                    collectibles.push(new Collectible(180, 340, 2));
+                    collectibles.push(new Collectible(380, 280, 2));
+                    collectibles.push(new Collectible(580, 220, 2));
+                    collectibles.push(new Collectible(220, 170, 2));
+                    collectibles.push(new Collectible(520, 120, 2));
+                    
+                    enemies.push(new Enemy(250, 340, 2));
+                    enemies.push(new Enemy(450, 220, 2));
+                    break;
+                    
+                case 3: // Шанхай
+                    levelDisplay.textContent = "Уровень 3: Шанхай";
+                    
+                    platforms.push(new Platform(100, 400, 100, 20, '#ff6b6b'));
+                    platforms.push(new Platform(250, 350, 100, 20, '#ff6b6b'));
+                    platforms.push(new Platform(450, 300, 100, 20, '#ff6b6b'));
+                    platforms.push(new Platform(600, 250, 100, 20, '#ff6b6b'));
+                    platforms.push(new Platform(350, 200, 100, 20, '#ffd93d'));
+                    platforms.push(new Platform(150, 150, 100, 20, '#ffd93d'));
+                    
+                    collectibles.push(new Collectible(120, 360, 3));
+                    collectibles.push(new Collectible(270, 310, 3));
+                    collectibles.push(new Collectible(470, 260, 3));
+                    collectibles.push(new Collectible(620, 210, 3));
+                    collectibles.push(new Collectible(370, 160, 3));
+                    collectibles.push(new Collectible(170, 110, 3));
+                    
+                    enemies.push(new Enemy(200, 310, 3));
+                    enemies.push(new Enemy(500, 210, 3));
+                    enemies.push(new Enemy(300, 110, 3));
+                    break;
+            }
+            
+            updateUI();
+        }
+        
+        // Обновление UI
+        function updateUI() {
+            scoreDisplay.textContent = `Очки: ${score}`;
+            livesDisplay.textContent = `Жизни: ${lives}`;
+        }
+        
+        // Показать сообщение
+        function showMessage(text) {
+            gameMessage.textContent = text;
+            gameMessage.style.display = 'block';
+        }
+        
+        // Скрыть сообщение
+        function hideMessage() {
+            gameMessage.style.display = 'none';
+        }
+        
+        // Игровой цикл
+        function gameLoop() {
+            if (!gameRunning) return;
+            
+            // Очистка холста
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Рисуем фон с градиентом
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            
+            // Разные фоны для каждого уровня
+            switch(currentLevel) {
+                case 1: // Токио
+                    gradient.addColorStop(0, '#0d1b2a');
+                    gradient.addColorStop(1, '#1b3a4b');
+                    break;
+                case 2: // Сеул
+                    gradient.addColorStop(0, '#1a1a2e');
+                    gradient.addColorStop(1, '#39395f');
+                    break;
+                case 3: // Шанхай
+                    gradient.addColorStop(0, '#2d1b2e');
+                    gradient.addColorStop(1, '#5d2d5f');
+                    break;
+            }
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Рисуем декоративные элементы
+            drawBackgroundElements();
+            
+            // Обновление и отрисовка платформ
+            for (let platform of platforms) {
+                platform.draw();
+            }
+            
+            // Обновление и отрисовка предметов
+            for (let collectible of collectibles) {
+                collectible.update();
+                collectible.draw();
+                
+                // Проверка сбора предметов
+                if (collectible.checkCollision(player) && !collectible.collected) {
+                    collectible.collected = true;
+                    score += 100;
+                    updateUI();
+                    
+                    // Проверка на завершение уровня
+                    let levelComplete = true;
+                    for (let item of collectibles) {
+                        if (!item.collected) {
+                            levelComplete = false;
+                            break;
+                        }
+                    }
+                    
+                    if (levelComplete) {
+                        if (currentLevel < 3) {
+                            showMessage(`Уровень ${currentLevel} пройден!`);
+                            setTimeout(() => {
+                                initLevel(currentLevel + 1);
+                                hideMessage();
+                            }, 1500);
+                        } else {
+                            gameWon = true;
+                            showMessage("ПОБЕДА! Все уровни пройдены!");
+                        }
+                    }
+                }
+            }
+            
+            // Обновление и отрисовка врагов
+            for (let enemy of enemies) {
+                enemy.update();
+                enemy.draw();
+                
+                // Проверка столкновения с игроком
+                if (enemy.checkCollision(player)) {
+                    player.takeDamage();
+                }
+            }
+            
+            // Обновление и отрисовка игрока
+            player.update(platforms);
+            player.draw();
+            
+            // Проверка условий завершения игры
+            if (gameOver) {
+                showMessage("ИГРА ОКОНЧЕНА");
+                gameRunning = false;
+                return;
+            }
+            
+            // Продолжение игрового цикла
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Рисуем декоративные элементы фона
+        function drawBackgroundElements() {
+            // Звезды/огни города
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+            for (let i = 0; i < 50; i++) {
+                const x = (i * 37) % canvas.width;
+                const y = (i * 23) % 200;
+                const size = Math.sin(Date.now()/1000 + i) * 2 + 2;
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Декоративные символы для каждого уровня
+            ctx.font = "30px Arial";
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+            
+            switch(currentLevel) {
+                case 1: // Токио
+                    ctx.fillText("東京", 700, 100);
+                    ctx.fillText("ゲーム", 50, 80);
+                    break;
+                case 2: // Сеул
+                    ctx.fillText("서울", 700, 100);
+                    ctx.fillText("게임", 50, 80);
+                    break;
+                case 3: // Шанхай
+                    ctx.fillText("上海", 700, 100);
+                    ctx.fillText("游戏", 50, 80);
+                    break;
+            }
+        }
+        
+        // Управление с клавиатуры
+        const keys = {};
+        
+        window.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            
+            if (e.key === ' ' || e.key === 'ArrowUp') {
+                player.jump();
+            }
+        });
+        
+        window.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+        
+        // Обработка непрерывного нажатия клавиш
+        function handleContinuousKeys() {
+            if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
+                player.moveLeft();
+            }
+            if (keys['ArrowRight'] || keys['d'] || keys['D']) {
+                player.moveRight();
+            }
+        }
+        
+        // Обновление управления
+        function updateControls() {
+            handleContinuousKeys();
+            if (gameRunning) {
+                setTimeout(updateControls, 16);
+            }
+        }
+        
+        // Кнопки управления
+        startBtn.addEventListener('click', () => {
+            if (!gameRunning) {
+                gameRunning = true;
+                gameOver = false;
+                gameWon = false;
+                score = 0;
+                lives = 3;
+                initLevel(1);
+                hideMessage();
+                updateControls();
+                gameLoop();
+            }
+        });
+        
+        restartBtn.addEventListener('click', () => {
+            gameRunning = true;
+            gameOver = false;
+            gameWon = false;
+            score = 0;
+            lives = 3;
+            initLevel(1);
+            hideMessage();
+            updateControls();
+            gameLoop();
+        });
+        
+        level1Btn.addEventListener('click', () => {
+            if (gameRunning) {
+                initLevel(1);
+                hideMessage();
+            }
+        });
+        
+        level2Btn.addEventListener('click', () => {
+            if (gameRunning) {
+                initLevel(2);
+                hideMessage();
+            }
+        });
+        
+        level3Btn.addEventListener('click', () => {
+            if (gameRunning) {
+                initLevel(3);
+                hideMessage();
+            }
+        });
+        
+        // Инициализация при загрузке
+        window.addEventListener('load', () => {
+            initLevel(1);
+            showMessage("Нажмите 'Начать игру'");
+        });
+    </script>
+</body>
+</html>
